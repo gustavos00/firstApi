@@ -1,6 +1,7 @@
 const http = require("http");
 const { URL } = require("url");
 
+const bodyParser = require("./helpers/bodyParser");
 const routes = require("./routes");
 
 const server = http.createServer((request, response) => {
@@ -18,8 +19,7 @@ const server = http.createServer((request, response) => {
 
   const route = routes.find(
     (routObject) =>
-      routObject.endpoint === pathname &&
-      routObject.method === request.method
+      routObject.endpoint === pathname && routObject.method === request.method
   );
 
   if (route) {
@@ -29,12 +29,18 @@ const server = http.createServer((request, response) => {
     response.send = (statusCode, body) => {
       response.writeHead(statusCode, { "Content-Type": "text/html" });
       response.end(body);
+    };
+
+    if (["POST", "PUT"].includes(request.method)) {
+      bodyParser(request, () => {
+        route.handler(request, response);
+      });
+    } else {
+      route.handler(request, response);
     }
-
-
-    route.handler(request, response);
   } else {
-   
+    response.writeHead(statusCode, { "Content-Type": "text/html" });
+    response.end(`Cannot ${request.method} ${parsedUrl.pathname}`);
   }
 });
 
