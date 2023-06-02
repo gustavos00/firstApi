@@ -28,7 +28,7 @@ const server = http.createServer((request, response) => {
 
     response.send = (statusCode, body) => {
       response.writeHead(statusCode, { "Content-Type": "text/html" });
-      response.end(body);
+      response.end(JSON.stringify(body));
     };
 
     if (["POST", "PUT"].includes(request.method)) {
@@ -39,7 +39,7 @@ const server = http.createServer((request, response) => {
       route.handler(request, response);
     }
   } else {
-    response.writeHead(statusCode, { "Content-Type": "text/html" });
+    response.writeHead(404, { "Content-Type": "text/html" });
     response.end(`Cannot ${request.method} ${parsedUrl.pathname}`);
   }
 });
